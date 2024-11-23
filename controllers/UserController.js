@@ -20,3 +20,28 @@ export function createUser(req, res) {
       });
     });
 }
+export function userLogin(req, res) {
+  User.find({ email: req.body.email }).then((users) => {
+    if (users.length == 0) {
+      res.json({
+        message: "User Not found",
+      });
+    } else {
+      const user = users[0];
+      const isPasswordCorrect = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+
+      if (isPasswordCorrect) {
+        res.json({
+          message: "Loged in",
+        });
+      } else {
+        res.json({
+          message: "User not Logged in ,Invalid Password ",
+        });
+      }
+    }
+  });
+}
