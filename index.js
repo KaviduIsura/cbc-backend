@@ -1,7 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
-import studentRouter from "./routes/studentRouter.js";
 import productRouter from "./routes/productRoute.js";
 
 const app = express();
@@ -21,7 +20,6 @@ connection.once("open", () => {
 });
 
 //Routes
-app.use("/api/students", studentRouter);
 app.use("/api/products", productRouter);
 
 app.listen(5000, () => {
