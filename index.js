@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import productRouter from "./routes/productRoute.js";
+import userRouter from "./routes/userRouter.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ connection.once("open", () => {
 
 //Routes
 app.use("/api/products", productRouter);
+app.use("/api/user", userRouter);
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");
