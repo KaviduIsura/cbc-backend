@@ -22,7 +22,7 @@ connection.once("open", () => {
 
 //Routes
 app.use("/api/products", productRouter);
-app.use("/api/user", userRouter);
+app.use("/api/users", userRouter);
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");
