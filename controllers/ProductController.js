@@ -29,6 +29,21 @@ export function getProductByName(req, res) {
     });
 }
 export function saveProduct(req, res) {
+  console.log(req.user);
+
+  if (req.user == null) {
+    res.json({
+      message: "You re not logged in",
+    });
+    return;
+  }
+
+  if (req.user.type != "admin") {
+    res.json({
+      message: "You're not an admin",
+    });
+    return;
+  }
   const product = new Product(req.body);
   product
     .save()
