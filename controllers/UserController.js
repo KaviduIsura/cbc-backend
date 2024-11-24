@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export function createUser(req, res) {
   const newUserData = req.body;
@@ -34,8 +35,20 @@ export function userLogin(req, res) {
       );
 
       if (isPasswordCorrect) {
+        const token = jwt.sign(
+          {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            type: user.type,
+            isBlocked: user.isBlocked,
+            profilePic: user.profilePic,
+          },
+          "cbc-secrete-key-7973"
+        );
         res.json({
-          message: "Loged in",
+          message: "User Logged in",
+          token: token,
         });
       } else {
         res.json({
