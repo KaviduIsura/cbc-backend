@@ -40,16 +40,13 @@ export async function createOrder(req, res) {
   }
 }
 
-export function getOrders(req, res) {
-  Order.find()
-    .then((orders) => {
-      res.json({
-        list: orders,
-      });
-    })
-    .catch((error) => {
-      res.json({
-        message: error,
-      });
+export async function getOrders(req, res) {
+  try {
+    const orders = await Order.find({ email: req.user.email });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
+  }
 }
