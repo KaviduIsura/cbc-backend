@@ -41,7 +41,7 @@ export async function createOrder(req, res) {
 }
 
 export function getOrders(req, res) {
-  Order.find({})
+  Order.find()
     .then((orders) => {
       res.json({
         list: orders,
