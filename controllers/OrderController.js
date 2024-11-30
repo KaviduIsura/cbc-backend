@@ -1,5 +1,5 @@
 import Order from "../models/Order.js";
-import { isCustomer } from "./UserController";
+import { isCustomer } from "./UserController.js";
 
 export async function createOrder(req, res) {
   //CBC0001
@@ -38,4 +38,18 @@ export async function createOrder(req, res) {
       message: error.message,
     });
   }
+}
+
+export function getOrders(req, res) {
+  Order.find({})
+    .then((orders) => {
+      res.json({
+        list: orders,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        message: error,
+      });
+    });
 }
