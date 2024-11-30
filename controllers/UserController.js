@@ -77,5 +77,15 @@ export function userLogin(req, res) {
     }
   });
 }
+
+export function isAdmin(req) {
+  if (req.user == null) {
+    return false;
+  }
+  if (req.user.type != "admin") {
+    return false;
+  }
+  return true;
+}
 // johndoe@example.com  securepassword123 - admin
 //kavidu100@example.com  securepassword123 - customer
