@@ -24,6 +24,7 @@ connection.once("open", () => {
   console.log("Database Connected");
 });
 
+// middleware to handle token
 app.use((req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   console.log(token);
