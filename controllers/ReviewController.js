@@ -43,6 +43,21 @@ export async function getAllReviews(req, res) {
   }
 }
 
+//can view filtered reviews for customers
+export async function getFilteredReviews(req,res){
+  try{
+   const filteredReview =await Review.find({hidden:false})
+   res.status(200).json({
+    message:filteredReview
+   })
+  }catch(error){
+    res.status(500).json({
+      message:error.message
+    })
+  }
+}
+
+
 //can do only admin (hide reviews)
 export async function toggleReviewVisibility(req, res) {
   try {
