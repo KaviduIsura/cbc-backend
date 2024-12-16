@@ -1,5 +1,5 @@
 import Review from "../models/Review.js";
-import { isCustomer } from "./UserController.js";
+import { isAdmin, isCustomer } from "./UserController.js";
 
 //can do customers
 export async function saveReviews(req, res) {
@@ -38,5 +38,37 @@ export async function getAllReviews(req, res) {
   }
 }
 
-//can do only admin (delete)
-export async function deleteReviwe(req, res) {}
+//can do only admin (hide reviews)
+export async function toggleReviewVisibility(req, res) {
+  try {
+    if (!isAdmin(req)) {
+      return res.json({
+        message: "Login as administrator to edit Reviews",
+      });
+    }
+    const { reviewId } = req.params;
+    const { hidden } = req.body;
+
+    if (typeof hidden !== "boolean") {
+      return res.status(400).json({
+        message: "Invalid hidden status.",
+      });
+    }
+    const updatedReview = await Review.findByIdAndUpdate(
+      reviewId,
+      { hidden },
+      { new: true }
+    );
+    if (!updatedReview) {
+      return res.status(404).json({ message: "Review not found." });
+    }
+    res.status(200).json({
+      message: "Review visibility updated.",
+      updatedReview,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
