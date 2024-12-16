@@ -5,7 +5,7 @@ import { isAdmin, isCustomer } from "./UserController.js";
 export async function saveReviews(req, res) {
   try {
     if (!isCustomer(req)) {
-      res.json({
+      res.status(403).json({
         message: "Please login as customer to add reviews",
       });
     }
@@ -27,6 +27,11 @@ export async function saveReviews(req, res) {
 //can view all customers and admin
 export async function getAllReviews(req, res) {
   try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({
+        message: "Login as administrator to View all Reviews",
+      });
+    }
     const reviews = await Review.find({});
     res.json({
       message: reviews,
@@ -42,7 +47,7 @@ export async function getAllReviews(req, res) {
 export async function toggleReviewVisibility(req, res) {
   try {
     if (!isAdmin(req)) {
-      return res.json({
+      return res.status(403).json({
         message: "Login as administrator to edit Reviews",
       });
     }
