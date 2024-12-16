@@ -1,10 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
 const reviewSchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     required: true,
@@ -14,7 +10,7 @@ const reviewSchema = mongoose.Schema({
     required: true,
   },
   rating: {
-    type: number,
+    type: Number,
     required: true,
   },
   createdAt: {
@@ -23,5 +19,5 @@ const reviewSchema = mongoose.Schema({
     default: Date.now,
   },
 });
-const reviewModel = mongoose.Model("reviews", reviewSchema);
-export default reviewModel;
+const Review = mongoose.model("reviews", reviewSchema);
+export default Review;
