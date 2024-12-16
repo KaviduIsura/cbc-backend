@@ -24,8 +24,19 @@ export async function saveReviews(req, res) {
   }
 }
 
-//can do all customers and admin
-export async function getReviews(req, res) {}
+//can view all customers and admin
+export async function getAllReviews(req, res) {
+  try {
+    const reviews = await Review.find({});
+    res.json({
+      message: reviews,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+}
 
 //can do only admin (delete)
 export async function deleteReviwe(req, res) {}
