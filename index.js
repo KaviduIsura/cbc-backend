@@ -7,14 +7,13 @@ import dotenv from "dotenv";
 import productRouter from "./routes/productRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 import reviewRouter from "./routes/reviewRouter.js";
-import cors from 'cors'
-
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors())
+app.use(cors());
 
 app.use(bodyParser.json());
 
