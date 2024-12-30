@@ -84,7 +84,19 @@ export function userLogin(req, res) {
     }
   });
 }
-
+export async function getUsers(req, res) {
+  await User.find({})
+    .then((users) => {
+      res.json({
+        list: users,
+      });
+    })
+    .catch((error) => {
+      res.json({
+        message: error,
+      });
+    });
+}
 export function isAdmin(req) {
   if (req.user == null) {
     return false;
