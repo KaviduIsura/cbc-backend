@@ -23,6 +23,7 @@ const userSchema = mongoose.Schema({
     default: false,
   },
   type: {
+    required: true,
     type: String,
     default: "customer",
   },
