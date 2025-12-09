@@ -1,14 +1,22 @@
+
+
 import express from "express";
 import {
   createUser,
   getUsers,
   userLogin,
+  getCurrentUser
 } from "../controllers/UserController.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/", createUser);
+// Public routes
+userRouter.post("/", createUser); // Signup
+userRouter.post("/login", userLogin); // Login
 
-userRouter.get("/", getUsers);
-userRouter.post("/login", userLogin);
+// Protected routes (require authentication)
+userRouter.get("/", getUsers); // Get all users (admin only)
+userRouter.get("/me", getCurrentUser); // Get current user profile
+
 export default userRouter;
+
