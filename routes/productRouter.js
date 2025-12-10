@@ -1,17 +1,25 @@
 import express from "express";
-import updateProduct, {
+import {
   createProduct,
-  deleteProduct,
-  getProductById,
   getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  getProductCategories,
+  getFeaturedProducts
 } from "../controllers/ProductController.js";
 
 const productRouter = express.Router();
 
-productRouter.post("/", createProduct);
+// Public routes
 productRouter.get("/", getProducts);
+productRouter.get("/categories", getProductCategories);
+productRouter.get("/featured", getFeaturedProducts);
+productRouter.get("/:productId", getProductById);
+
+// Admin routes (require authentication)
+productRouter.post("/", createProduct);
 productRouter.put("/:productId", updateProduct);
 productRouter.delete("/:productId", deleteProduct);
-productRouter.get("/:productId", getProductById);
 
 export default productRouter;
