@@ -1,10 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const productSchema = mongoose.Schema({
-  productId: {
+   productId: {
     type: String,
     required: true,
     unique: true,
+    index: true
   },
   productName: {
     type: String,
