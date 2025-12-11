@@ -467,3 +467,20 @@ export function isAdmin(req) {
 export function isCustomer(req) {
   return req.user && req.user.type === "customer";
 }
+
+// Add this function to UserController.js (anywhere, but typically near the bottom)
+export function getUserFromToken(req) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return null;
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRETE);
+    return decoded;
+  } catch (error) {
+    console.error("Get user from token error:", error);
+    return null;
+  }
+}
