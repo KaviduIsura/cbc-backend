@@ -12,6 +12,7 @@ import cartRouter from "./routes/cartRouter.js";
 import wishlistRouter from "./routes/wishlistRouter.js";
 import cors from "cors";
 import customerRouter from "./routes/customerRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use("/api/reviews", reviewRouter);
 app.use('/api/cart', cartRouter); 
 app.use('/api/wishlist', wishlistRouter);
 app.use("/api/customers", customerRouter);
+app.use("/api/admins", adminRouter);
 
 app.listen(5001, () => {
   console.log("Server is running on port 5001");
