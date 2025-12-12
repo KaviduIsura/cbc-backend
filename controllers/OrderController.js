@@ -150,7 +150,8 @@ export async function getOrders(req, res) {
       // Admin can see all orders
       orders = await Order.find({})
         .sort({ createdAt: -1 })
-        .populate('userId', 'firstName lastName email');
+        .select('orderId status total paymentMethod deliveryMethod createdAt shippingInfo email isPaid orderedItems')
+        .lean();
     } else if (isCustomer(req)) {
       // Customer can only see their own orders
       orders = await Order.find({ 
@@ -158,7 +159,10 @@ export async function getOrders(req, res) {
           { email: req.user.email },
           { userId: req.user._id }
         ]
-      }).sort({ createdAt: -1 });
+      })
+      .sort({ createdAt: -1 })
+      .select('orderId status total paymentMethod deliveryMethod createdAt shippingInfo email isPaid orderedItems')
+      .lean();
     } else {
       return res.status(403).json({
         success: false,
@@ -166,21 +170,28 @@ export async function getOrders(req, res) {
       });
     }
 
+    // Format orders for frontend
+    const formattedOrders = orders.map(order => ({
+      _id: order._id,
+      orderId: order.orderId,
+      status: order.status,
+      total: order.total,
+      paymentMethod: order.paymentMethod,
+      deliveryMethod: order.deliveryMethod,
+      createdAt: order.createdAt,
+      itemsCount: order.orderedItems?.length || 0,
+      customerName: order.shippingInfo ? 
+        `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}` : 
+        'Unknown Customer',
+      email: order.email || order.shippingInfo?.email,
+      isPaid: order.isPaid,
+      shippingInfo: order.shippingInfo || null
+    }));
+
     res.json({
       success: true,
-      count: orders.length,
-      orders: orders.map(order => ({
-        _id: order._id,
-        orderId: order.orderId,
-        status: order.status,
-        total: order.total,
-        paymentMethod: order.paymentMethod,
-        deliveryMethod: order.deliveryMethod,
-        createdAt: order.createdAt,
-        itemsCount: order.orderedItems.length,
-        customerName: order.shippingInfo?.firstName + ' ' + order.shippingInfo?.lastName,
-        isPaid: order.isPaid,
-      }))
+      count: formattedOrders.length,
+      orders: formattedOrders
     });
 
   } catch (error) {
@@ -239,65 +250,6 @@ export async function getOrderById(req, res) {
   }
 }
 
-export async function updateOrderStatus(req, res) {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!isAdmin(req)) {
-      return res.status(403).json({
-        success: false,
-        message: "Access denied. Admin only."
-      });
-    }
-
-    const validStatuses = ['pending', 'pending_payment', 'preparing', 'shipped', 'delivered', 'cancelled', 'refunded'];
-    
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid status. Valid statuses are: " + validStatuses.join(', ')
-      });
-    }
-
-    const order = await Order.findByIdAndUpdate(
-      id,
-      { 
-        status,
-        updatedAt: Date.now(),
-        ...(status === 'delivered' && { isPaid: true, paidAt: Date.now() })
-      },
-      { new: true }
-    );
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found"
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Order status updated successfully",
-      order: {
-        _id: order._id,
-        orderId: order.orderId,
-        status: order.status,
-        updatedAt: order.updatedAt,
-        isPaid: order.isPaid
-      }
-    });
-
-  } catch (error) {
-    console.error("Update order status error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update order status",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-}
 
 export async function getQuote(req, res) {
   try {
@@ -439,6 +391,92 @@ export async function markAsPaid(req, res) {
     res.status(500).json({
       success: false,
       message: "Failed to mark order as paid",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+}
+// controllers/OrderController.js - Update the updateOrderStatus function
+export async function updateOrderStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    // Check if user is admin
+    if (!isAdmin(req)) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Admin only."
+      });
+    }
+
+    // Validate status
+    const validStatuses = ['pending', 'pending_payment', 'preparing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+    
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status. Valid statuses are: " + validStatuses.join(', ')
+      });
+    }
+
+    // Find the order first
+    const order = await Order.findById(id);
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    // Update order status
+    const updateData = {
+      status,
+      updatedAt: Date.now()
+    };
+
+    // Add notes if provided
+    if (notes) {
+      updateData.notes = notes;
+    }
+
+    // Update payment status if order is delivered
+    if (status === 'delivered') {
+      updateData.isPaid = true;
+      updateData.paidAt = Date.now();
+    }
+
+    // Mark as paid if status is preparing and payment was pending
+    if (status === 'preparing' && order.paymentMethod === 'cod' && !order.isPaid) {
+      updateData.isPaid = true;
+      updateData.paidAt = Date.now();
+    }
+
+    // Save the updated order
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: `Order status updated to ${status}`,
+      order: {
+        _id: updatedOrder._id,
+        orderId: updatedOrder.orderId,
+        status: updatedOrder.status,
+        updatedAt: updatedOrder.updatedAt,
+        isPaid: updatedOrder.isPaid,
+        notes: updatedOrder.notes
+      }
+    });
+
+  } catch (error) {
+    console.error("Update order status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update order status",
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
